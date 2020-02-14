@@ -24,6 +24,7 @@ class GridGraph {
     std::vector< int > at(const Point p);
     double get_diameter();
     double get_aspl();
+    void calculate_aspl();
 
     // operator
     bool operator == (const GridGraph & g) const;
