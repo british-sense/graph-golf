@@ -1,8 +1,14 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <string>
+#include <random>
+#include <algorithm>
 
 #include "point.hpp"
+#include "node.hpp"
+#include "edge.hpp"
+#include "params.hpp"
 
 struct GridGraph {
 
@@ -22,11 +28,13 @@ struct GridGraph {
     void generate_random_graph();
     void generate_random_regular_graph();
     void generate_cayley_graph();
-    void generate_symmetory_graph(int p);
-    std::vector< int > at(const Point pt);
+    void generate_symmetory_graph(int g, std::string pattern);
+    std::vector< int > at(const Point & pt);
     void calculate_aspl();
-    bool is_connectable_node(const Point pt);
+    bool is_connectable_node(const Point & pt);
     std::vector<Point> connectable_node_list();
+    void add_edge(const Edge & e);
+    void remove_edge(const Edge & e);
 
     // operator
     bool operator == (const GridGraph & g) const;
@@ -44,23 +52,21 @@ GridGraph::GridGraph(int h, int w, int d, int l) : height(h), width(w), diameter
 
 // member function
 void GridGraph::generate_random_graph() {
-    std::vector<Point> can_connect_node;
-    for(int h = 0; h < height; h++) {
-        for(int w = 0; w < width; w++) {
+    std::vector<Point> connectable_node(connectable_node_list());
+    std::shuffle(connectable_node.begin(), connectable_node.end(), mt);
+    while(!connectable_node.empty()) {
 
-        }
     }
 }
 void GridGraph::generate_random_regular_graph() {}
 void GridGraph::generate_cayley_graph() {}
-void GridGraph::generate_symmetory_graph(int g) { // g = 1, 2, 4, 8
-
+void GridGraph::generate_symmetory_graph(int g, std::string pattern = "point") { // g = 1, 2, 4, 8
 }
-std::vector< int > GridGraph::at(const Point pt) {
+std::vector< int > GridGraph::at(const Point & pt) {
     return grid.at(pt.h).at(pt.w);
 }
 void GridGraph::calculate_aspl() {}
-bool GridGraph::is_connectable_node(const Point pt) {
+bool GridGraph::is_connectable_node(const Point & pt) {
     if(grid.at(pt.h).at(pt.w).size() >= diameter) return false;
     for(int h = pt.h - length; h <= pt.h + length; h++) {
         if(h < 0 || height <= h) continue;
@@ -82,6 +88,11 @@ std::vector<Point> GridGraph::connectable_node_list() {
     }
     return connectable_node;
 }
+void GridGraph::add_edge(const Edge & e) {
+    this->at(e.u).emplace_back(e.v);
+    this->at(e.v).emplace_back(e.u);
+}
+void GridGraph::remove_edge(const Edge & e) {}
 
 // operator
 bool GridGraph::operator == (const GridGraph & g) const {
