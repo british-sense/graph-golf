@@ -14,8 +14,18 @@ struct Point {
     int get_width();
 
     // operator
-    bool operator < (const Point & g) const;
-    bool operator <= (const Point & g) const;
-    bool operator > (const Point & g) const;
-    bool operator >= (const Point & g) const;
+    bool operator == (const Point & pt) const;
+    bool operator != (const Point & pt) const;
+    bool operator < (const Point & pt) const;
+    bool operator <= (const Point & pt) const;
+    bool operator > (const Point & pt) const;
+    bool operator >= (const Point & pt) const;
 };
+
+// operator
+bool Point::operator == (const Point & pt) const {
+    return (h == pt.h) && (w == pt.w);
+}
+bool Point::operator != (const Point & pt) const {
+    return !((h == pt.h) && (w == pt.w));
+}
