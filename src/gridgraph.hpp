@@ -34,3 +34,37 @@ class GridGraph {
     bool operator > (const GridGraph & g) const;
     bool operator >= (const GridGraph & g) const;
 };
+
+// constractor
+GridGraph::GridGraph() {}
+GridGraph::GridGraph(int h, int w) : height(h), width(w) {}
+GridGraph::GridGraph(int h, int w, int d, int l) : height(h), width(w), diameter(d), length(l) {}
+
+// member function
+void GridGraph::generate_random_graph() {}
+void GridGraph::generate_cayley_graph() {}
+void GridGraph::generate_symmetory_graph(int p) {}
+std::vector< int > GridGraph::at(const Point p) {}
+double GridGraph::get_diameter() {}
+double GridGraph::get_aspl() {}
+void GridGraph::calculate_aspl() {}
+
+// operator
+bool GridGraph::operator == (const GridGraph & g) const {
+    return grid == g.grid;
+}
+bool GridGraph::operator != (const GridGraph & g) const {
+    return grid != g.grid;
+}
+bool GridGraph::operator < (const GridGraph & g) const {
+    return aspl < g.aspl;
+}
+bool GridGraph::operator <= (const GridGraph & g) const {
+    return aspl <= g.aspl;
+}
+bool GridGraph::operator > (const GridGraph & g) const {
+    return aspl > g.aspl;
+}
+bool GridGraph::operator >= (const GridGraph & g) const {
+    return aspl >= g.aspl;
+}
