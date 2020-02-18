@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "point.hpp"
 
@@ -43,10 +44,16 @@ GridGraph::GridGraph(int h, int w, int d, int l) : height(h), width(w), diameter
 // member function
 void GridGraph::generate_random_graph() {}
 void GridGraph::generate_cayley_graph() {}
-void GridGraph::generate_symmetory_graph(int p) {}
+void GridGraph::generate_symmetory_graph(int g) { // g = 1, 2, 4, 8
+
+}
 std::vector< int > GridGraph::at(const Point p) {}
-double GridGraph::get_diameter() {}
-double GridGraph::get_aspl() {}
+double GridGraph::get_diameter() {
+    return diameter;
+}
+double GridGraph::get_aspl() {
+    return aspl;
+}
 void GridGraph::calculate_aspl() {}
 
 // operator
