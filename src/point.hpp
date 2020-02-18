@@ -29,3 +29,15 @@ bool Point::operator == (const Point & pt) const {
 bool Point::operator != (const Point & pt) const {
     return !((h == pt.h) && (w == pt.w));
 }
+bool Point::operator < (const Point & pt) const {
+    return std::pair<int, int>(h, w) < std::pair<int, int>(pt.h, pt.w);
+}
+bool Point::operator <= (const Point & pt) const {
+    return std::pair<int, int>(h, w) <= std::pair<int, int>(pt.h, pt.w);
+}
+bool Point::operator > (const Point & pt) const {
+    return std::pair<int, int>(h, w) > std::pair<int, int>(pt.h, pt.w);
+}
+bool Point::operator >= (const Point & pt) const {
+    return std::pair<int, int>(h, w) >= std::pair<int, int>(pt.h, pt.w);
+}
