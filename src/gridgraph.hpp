@@ -72,7 +72,16 @@ bool GridGraph::is_connectable_node(const Point pt) {
     }
     return false;
 }
-std::vector<Point> GridGraph::connectable_node_list() {}
+std::vector<Point> GridGraph::connectable_node_list() {
+    std::vector<Point> connectable_node;
+    for(int h = 0; h < height; h++) {
+        for (int w = 0; w < width; w++) {
+            Point pt(h, w);
+            if(is_connectable_node(pt)) connectable_node.emplace_back(pt);
+        }
+    }
+    return connectable_node;
+}
 
 // operator
 bool GridGraph::operator == (const GridGraph & g) const {
