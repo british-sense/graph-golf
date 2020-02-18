@@ -4,7 +4,7 @@
 
 #include "point.hpp"
 
-class GridGraph {
+struct GridGraph {
 
     // member variables
     int height, width;
@@ -23,8 +23,6 @@ class GridGraph {
     void generate_cayley_graph();
     void generate_symmetory_graph(int p);
     std::vector< int > at(const Point p);
-    double get_diameter();
-    double get_aspl();
     void calculate_aspl();
 
     // operator
@@ -47,12 +45,8 @@ void GridGraph::generate_cayley_graph() {}
 void GridGraph::generate_symmetory_graph(int g) { // g = 1, 2, 4, 8
 
 }
-std::vector< int > GridGraph::at(const Point p) {}
-double GridGraph::get_diameter() {
-    return diameter;
-}
-double GridGraph::get_aspl() {
-    return aspl;
+std::vector< int > GridGraph::at(const Point pt) {
+    return grid.at(pt.h).at(pt.w);
 }
 void GridGraph::calculate_aspl() {}
 
