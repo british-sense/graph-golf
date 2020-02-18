@@ -1,6 +1,6 @@
 #include <iostream>
 
-class Point {
+struct Point {
 
     // menber variable
     int h, w;
@@ -14,15 +14,8 @@ class Point {
     int get_width();
 
     // operator
-    bool operator < (const GridGraph & g) const;
-    bool operator <= (const GridGraph & g) const;
-    bool operator > (const GridGraph & g) const;
-    bool operator >= (const GridGraph & g) const;
+    bool operator < (const Point & g) const;
+    bool operator <= (const Point & g) const;
+    bool operator > (const Point & g) const;
+    bool operator >= (const Point & g) const;
 };
-
-int Point::get_height() {
-    return h;
-}
-int Point::get_width() {
-    return w;
-}
