@@ -1,5 +1,7 @@
 #pragma once
+
 #include <iostream>
+#include <string>
 
 struct Point {
 
@@ -11,7 +13,7 @@ struct Point {
     Point(int _h, int _w);
 
     // member function
-    void output();
+    std::string output();
 
     // operator
     bool operator == (const Point & pt) const;
@@ -27,7 +29,7 @@ Point::Point() {}
 Point::Point(int _h, int _w) : h(_h), w(_w) {}
 
 // member function
-void Point::output() {
+std::string Point::output() {
     std::cout << "(" + std::to_string(h) + ", " + std::to_string(w) +")" << std::endl;
 }
 
