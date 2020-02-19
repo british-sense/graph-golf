@@ -30,7 +30,7 @@ Point::Point(int _h, int _w) : h(_h), w(_w) {}
 
 // member function
 std::string Point::output() {
-    std::cout << "(" + std::to_string(h) + ", " + std::to_string(w) +")" << std::endl;
+    return "(" + std::to_string(h) + ", " + std::to_string(w) +")";
 }
 
 
