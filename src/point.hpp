@@ -11,8 +11,7 @@ struct Point {
     Point(int _h, int _w);
 
     // member function
-    int get_height();
-    int get_width();
+    void output();
 
     // operator
     bool operator == (const Point & pt) const;
@@ -23,8 +22,15 @@ struct Point {
     bool operator >= (const Point & pt) const;
 };
 
+// constractor
 Point::Point() {}
 Point::Point(int _h, int _w) : h(_h), w(_w) {}
+
+// member function
+void Point::output() {
+    std::cout << "(" + std::to_string(h) + ", " + std::to_string(w) +")" << std::endl;
+}
+
 
 // operator
 bool Point::operator == (const Point & pt) const {
