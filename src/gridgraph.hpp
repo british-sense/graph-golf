@@ -15,7 +15,7 @@ struct GridGraph {
     // member variables
     int height, width;
     int dimension, length;
-    std::vector< std::vector< std::vector< int > > > grid;
+    std::vector< std::vector< std::vector< Point > > > grid;
     int diameter;
     double aspl;
 
@@ -29,7 +29,7 @@ struct GridGraph {
     void generate_random_regular_graph();
     void generate_cayley_graph();
     void generate_symmetory_graph(int g, std::string pattern);
-    std::vector< int > at(const Point & pt);
+    std::vector< Point > at(const Point & pt);
     void calculate_aspl();
     bool is_connectable_node(const Point & pt);
     std::vector<Point> connectable_node_list();
@@ -62,7 +62,7 @@ void GridGraph::generate_random_regular_graph() {}
 void GridGraph::generate_cayley_graph() {}
 void GridGraph::generate_symmetory_graph(int g, std::string pattern = "point") { // g = 1, 2, 4, 8
 }
-std::vector< int > GridGraph::at(const Point & pt) {
+std::vector< Point > GridGraph::at(const Point & pt) {
     return grid.at(pt.h).at(pt.w);
 }
 void GridGraph::calculate_aspl() {}
@@ -92,7 +92,10 @@ void GridGraph::add_edge(const Edge & e) {
     this->at(e.u).emplace_back(e.v);
     this->at(e.v).emplace_back(e.u);
 }
-void GridGraph::remove_edge(const Edge & e) {}
+void GridGraph::remove_edge(const Edge & e) {
+    this->at(e.u).erase(std::find(this->at(e.u).begin(), this->at(e.u).end(), e.v));
+    this->at(e.v).erase(std::find(this->at(e.v).begin(), this->at(e.v).end(), e.u));
+}
 
 // operator
 bool GridGraph::operator == (const GridGraph & g) const {
