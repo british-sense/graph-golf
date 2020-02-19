@@ -29,7 +29,6 @@ struct GridGraph {
     // menber function
     void generate_random_graph();
     void generate_random_regular_graph();
-    void generate_cayley_graph();
     void generate_symmetory_graph(int g, std::string pattern);
     std::vector< Node > at(const Node & pt);
     void calculate_aspl();
@@ -39,6 +38,8 @@ struct GridGraph {
     std::tuple<Node, Node> select_connection_node(std::vector<Node> & node_list);
     void add_edge(const Edge & e);
     void remove_edge(const Edge & e);
+    void output();
+
 
     // operator
     bool operator == (const GridGraph & g) const;
@@ -51,8 +52,8 @@ struct GridGraph {
 
 // constractor
 GridGraph::GridGraph() {}
-GridGraph::GridGraph(int h, int w) : height(h), width(w) {}
-GridGraph::GridGraph(int h, int w, int d, int l) : height(h), width(w), degree(d), length(l) {}
+GridGraph::GridGraph(int h, int w) : height(h), width(w), grid(std::vector< std::vector< std::vector< Node > > >(h, std::vector< std::vector< Node > >(w))) {}
+GridGraph::GridGraph(int h, int w, int d, int l) : height(h), width(w), degree(d), length(l), grid(std::vector< std::vector< std::vector< Node > > >(h, std::vector< std::vector< Node > >(w))) {}
 
 // member function
 void GridGraph::generate_random_graph() {
@@ -66,18 +67,18 @@ void GridGraph::generate_random_graph() {
     }
 }
 void GridGraph::generate_random_regular_graph() {}
-void GridGraph::generate_cayley_graph() {}
 void GridGraph::generate_symmetory_graph(int g, std::string pattern = "Node") { // g = 1, 2, 4, 8
 }
 std::vector< Node > GridGraph::at(const Node & pt) {
     return grid.at(pt.h).at(pt.w);
 }
 void GridGraph::calculate_aspl() {}
+
 bool GridGraph::is_connectable_node(const Node & n) {
     if(grid.at(n.h).at(n.w).size() >= diameter) return false;
     for(int h = n.h - length; h <= n.h + length; h++) {
         if(h < 0 || height <= h) continue;
-        for(int w = n.w - length; w <= n.w + length; h++) {
+        for(int w = n.w - length; w <= n.w + length; w++) {
             if(w < 0 || width <= w) continue;
             if(n == Node(h, w)) continue;
             if(grid.at(h).at(w).size() < diameter) return true;
@@ -89,8 +90,8 @@ std::vector<Node> GridGraph::connectable_node_list() {
     std::vector<Node> connectable_node;
     for(int h = 0; h < height; h++) {
         for (int w = 0; w < width; w++) {
-            Node pt(h, w);
-            if(is_connectable_node(pt)) connectable_node.emplace_back(pt);
+            Node n(h, w);
+            if(is_connectable_node(n)) connectable_node.emplace_back(n);
         }
     }
     return connectable_node;
@@ -126,6 +127,18 @@ void GridGraph::add_edge(const Edge & e) {
 void GridGraph::remove_edge(const Edge & e) {
     this->at(e.u).erase(std::find(this->at(e.u).begin(), this->at(e.u).end(), e.v));
     this->at(e.v).erase(std::find(this->at(e.v).begin(), this->at(e.v).end(), e.u));
+}
+void GridGraph::output() {
+    for(int h = 0; h < height; h++) {
+        for(int w = 0; w < width; w++) {
+            Node n(h, w);
+            std::cout << n.Point::output() + " : ";
+            for(int d = 0; d < this->at(n).size(); d++) {
+                std::cout << this->at(n).at(d).Point::output << ", ";
+            }
+            std::cout << std::endl;
+        }
+    }
 }
 
 // operator
