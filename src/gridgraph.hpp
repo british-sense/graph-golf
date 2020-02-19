@@ -30,9 +30,11 @@ struct GridGraph {
     void generate_random_graph();
     void generate_random_regular_graph();
     void generate_symmetory_graph(int g, std::string pattern);
-    std::vector< Node > at(const Node & pt);
+    const std::vector< Node > & at(const Node & n) const;
+    std::vector< Node > & at(const Node & n);
     void calculate_aspl();
-    bool is_connectable_node(const Node & pt);
+    bool is_connectable_node(const Node & n);
+    bool exists_edge(const Node & u, const Node & v);
     std::vector<Node> connectable_node_list();
     Node select_random_node(std::vector<Node> & node_list);
     std::tuple<Node, Node> select_connection_node(std::vector<Node> & node_list);
@@ -64,13 +66,19 @@ void GridGraph::generate_random_graph() {
         add_edge(Edge(u, v));
         if(this->at(u).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), v));
         if(this->at(v).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), u));
+        std::cout << connectable_node.size() << " : ";
+        for(auto n : connectable_node) std::cout << n.Point::output(); std::cout << std::endl;
+        output();
     }
 }
 void GridGraph::generate_random_regular_graph() {}
-void GridGraph::generate_symmetory_graph(int g, std::string pattern = "Node") { // g = 1, 2, 4, 8
+void GridGraph::generate_symmetory_graph(int g, std::string pattern = "point") { // g = 1, 2, 4, 8
 }
-std::vector< Node > GridGraph::at(const Node & pt) {
-    return grid.at(pt.h).at(pt.w);
+std::vector< Node > & GridGraph::at(const Node & n) {
+    return grid.at(n.h).at(n.w);
+}
+const std::vector< Node > & GridGraph::at(const Node & n) const {
+    return grid.at(n.h).at(n.w);
 }
 void GridGraph::calculate_aspl() {}
 
@@ -86,6 +94,10 @@ bool GridGraph::is_connectable_node(const Node & n) {
     }
     return false;
 }
+bool GridGraph::exists_edge(const Node & u, const Node & v) {
+    return std::find(this->at(u).begin(), this->at(u).end(), v) != this->at(u).end() ? true : false;
+}
+
 std::vector<Node> GridGraph::connectable_node_list() {
     std::vector<Node> connectable_node;
     for(int h = 0; h < height; h++) {
@@ -102,7 +114,7 @@ Node GridGraph::select_random_node(std::vector<Node> & node_list) {
 }
 std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & node_list) {
     Node u, v;
-    while(manhattan_distance(u, v) <= length) {
+    while(manhattan_distance(u, v) > length || u == v || exists_edge(u, v)) {
         u = select_random_node(node_list);
         if(!is_connectable_node(u)) {
             node_list.erase(std::find(node_list.begin(), node_list.end(), u));
@@ -134,7 +146,7 @@ void GridGraph::output() {
             Node n(h, w);
             std::cout << n.Point::output() + " : ";
             for(int d = 0; d < this->at(n).size(); d++) {
-                std::cout << this->at(n).at(d).Point::output << ", ";
+                std::cout << this->at(n).at(d).Point::output() << ((d != this->at(n).size() - 1) ? ", " : " ");
             }
             std::cout << std::endl;
         }
