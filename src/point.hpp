@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 struct Point {
@@ -7,7 +8,7 @@ struct Point {
 
     // constractor
     Point();
-    Point(int h, int w);
+    Point(int _h, int _w);
 
     // member function
     int get_height();
@@ -21,6 +22,9 @@ struct Point {
     bool operator > (const Point & pt) const;
     bool operator >= (const Point & pt) const;
 };
+
+Point::Point() {}
+Point::Point(int _h, int _w) : h(_h), w(_w) {}
 
 // operator
 bool Point::operator == (const Point & pt) const {
