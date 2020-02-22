@@ -39,8 +39,11 @@ struct GridGraph {
     std::vector<Node> connectable_node_list();
     Node select_random_node(const std::vector<Node> & node_list);
     std::tuple<Node, Node> select_connection_node(std::vector<Node> & node_list);
+    std::tuple<Edge, Edge> select_swap_edge();
     void add_edge(const Edge & e);
     void remove_edge(const Edge & e);
+    void swap_edge(const Edge & e1, const Edge & e2);
+    void hill_climbing(const int max_evaluation_count);
     void output();
     void output_edgefile(const std::string & filename);
 
@@ -70,7 +73,8 @@ void GridGraph::generate_random_graph() {
         if(this->at(v).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), v));
     }
 }
-void GridGraph::generate_random_regular_graph() {}
+void GridGraph::generate_random_regular_graph() {
+}
 void GridGraph::generate_symmetory_graph(int g, std::string pattern = "point") { // g = 1, 2, 4, 8
 }
 std::vector< Node > & GridGraph::at(const Node & n) {
@@ -79,8 +83,8 @@ std::vector< Node > & GridGraph::at(const Node & n) {
 const std::vector< Node > & GridGraph::at(const Node & n) const {
     return grid.at(n.h).at(n.w);
 }
-void GridGraph::calculate_aspl() {}
-
+void GridGraph::calculate_aspl() {
+}
 bool GridGraph::is_connectable_node(const Node & u) {
     if(this->at(u).size() >= degree) return false;
     for(int h = u.h - length; h <= u.h + length; h++) {
@@ -114,7 +118,9 @@ Node GridGraph::select_random_node(const std::vector<Node> & node_list) {
 }
 std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & node_list) {
     Node u, v;
-    while(manhattan_distance(u, v) > length || u == v || exists_edge(u, v)) {
+    bool is_selected = false;
+    while(manhattan_distance(u, v) > length || u == v || exists_edge(u, v) || !is_selected) {
+        is_selected = false;
         u = select_random_node(node_list);
         if(!is_connectable_node(u)) {
             node_list.erase(std::find(node_list.begin(), node_list.end(), u));
@@ -129,6 +135,7 @@ std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & nod
             if(node_list.empty()) break;
             else continue;
         }
+        is_selected = true;
     }
     return {u, v};
 }
@@ -139,6 +146,17 @@ void GridGraph::add_edge(const Edge & e) {
 void GridGraph::remove_edge(const Edge & e) {
     this->at(e.u).erase(std::find(this->at(e.u).begin(), this->at(e.u).end(), e.v));
     this->at(e.v).erase(std::find(this->at(e.v).begin(), this->at(e.v).end(), e.u));
+}
+void GridGraph::swap_edge(const Edge & e1, const Edge & e2) {
+}
+void GridGraph::hill_climbing(const int max_evaluation_count) {
+    for(int evaluation_count = 0; evaluation_count < max_evaluation_count; evaluation_count++) {
+        GridGraph G = *this;
+        auto [e1, e2] = G.select_swap_edge();
+        G.swap_edge(e1, e2);
+        G.calculate_aspl();
+        if(*this > G) *this = G;
+    }
 }
 void GridGraph::output() {
     for(int h = 0; h < height; h++) {
@@ -152,7 +170,6 @@ void GridGraph::output() {
         }
     }
 }
-
 void GridGraph::output_edgefile(const std::string & filename) {
     std::ofstream outputfile("../data/" + filename + ".edges");
     for(int h = 0; h < height; h++){    
@@ -173,14 +190,22 @@ bool GridGraph::operator != (const GridGraph & g) const {
     return grid != g.grid;
 }
 bool GridGraph::operator < (const GridGraph & g) const {
-    return aspl < g.aspl;
+    if(diameter < g.diameter) return true;
+    else if(diameter == g.diameter) return aspl < g.aspl;
+    else return false;
 }
 bool GridGraph::operator <= (const GridGraph & g) const {
-    return aspl <= g.aspl;
+    if(diameter < g.diameter) return true;
+    else if(diameter == g.diameter) return aspl <= g.aspl;
+    else return false;
 }
 bool GridGraph::operator > (const GridGraph & g) const {
-    return aspl > g.aspl;
+    if(diameter > g.diameter) return true;
+    else if(diameter == g.diameter) return aspl > g.aspl;
+    else return false;
 }
 bool GridGraph::operator >= (const GridGraph & g) const {
-    return aspl >= g.aspl;
+    if(diameter > g.diameter) return true;
+    else if(diameter == g.diameter) return aspl >= g.aspl;
+    else return false;
 }
