@@ -13,7 +13,7 @@ struct Point {
     Point(int _h, int _w);
 
     // member function
-    std::string output();
+    std::string output() const;
 
     // operator
     bool operator == (const Point & pt) const;
@@ -29,8 +29,8 @@ Point::Point() {}
 Point::Point(int _h, int _w) : h(_h), w(_w) {}
 
 // member function
-std::string Point::output() {
-    return "(" + std::to_string(h) + ", " + std::to_string(w) +")";
+std::string Point::output() const {
+    return std::to_string(h) + "," + std::to_string(w);
 }
 
 
