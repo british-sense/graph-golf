@@ -64,7 +64,7 @@ void GridGraph::generate_random_graph() {
     std::vector<Node> connectable_node(connectable_node_list());
     while(!connectable_node.empty()) {
 std::cout << connectable_node.size() << " : ";
-for(auto n : connectable_node) std::cout << n.Point::output(); std::cout << std::endl;
+for(auto n : connectable_node) std::cout << n.Point::output() << " "; std::cout << std::endl;
 output();
         auto [u, v] = select_connection_node(connectable_node);
 std::cout << u.Point::output() << ", " << v.Point::output() << std::endl;
@@ -85,18 +85,20 @@ const std::vector< Node > & GridGraph::at(const Node & n) const {
 }
 void GridGraph::calculate_aspl() {}
 
-bool GridGraph::is_connectable_node(const Node & n) {
-    std::cout << n.Point::output() << std::endl;
-    if(grid.at(n.h).at(n.w).size() >= degree) {
+bool GridGraph::is_connectable_node(const Node & u) {
+    std::cout << u.Point::output() << std::endl;
+    if(this->at(u).size() >= degree) {
         std::cout << "out of degree range" << std::endl;
         return false;
     }
-    for(int h = n.h - length; h <= n.h + length; h++) {
+    for(int h = u.h - length; h <= u.h + length; h++) {
         if(h < 0 || height <= h) continue;
-        for(int w = n.w - (length - std::abs(h - n.h)); w <= n.w + (length - std::abs(h - n.h)); w++) {
+        for(int w = u.w - (length - std::abs(h - u.h)); w <= u.w + (length - std::abs(h - u.h)); w++) {
             if(w < 0 || width <= w) continue;
-            if(n == Node(h, w)) continue;
-            if(grid.at(h).at(w).size() < degree) {
+            Node v(h, w);
+            if(u == v) continue;
+            if(exists_edge(u, v)) continue;
+            if(this->at(v).size() < degree) {
                 std::cout << "in the degree range" << std::endl;
                 return true;
             }
