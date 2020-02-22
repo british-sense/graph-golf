@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 #include <random>
 #include <algorithm>
 #include <tuple>
@@ -41,6 +42,7 @@ struct GridGraph {
     void add_edge(const Edge & e);
     void remove_edge(const Edge & e);
     void output();
+    void output_edgefile(const std::string & filename);
 
 
     // operator
@@ -160,6 +162,18 @@ void GridGraph::output() {
                 std::cout << this->at(n).at(d).Point::output() << ((d != this->at(n).size() - 1) ? ", " : " ");
             }
             std::cout << std::endl;
+        }
+    }
+}
+
+void GridGraph::output_edgefile(const std::string & filename) {
+    std::ofstream outputfile("../data/" + filename + ".edges");
+    for(int h = 0; h < height; h++){    
+        for(int w = 0; w < width; w++){
+            Node u(h, w);
+            for(const auto & v : this->at(u)){
+                if(u <= v) outputfile << u.Point::output() << " " << v.Point::output() << std::endl;
+            }
         }
     }
 }
