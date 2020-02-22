@@ -36,7 +36,7 @@ struct GridGraph {
     bool is_connectable_node(const Node & n);
     bool exists_edge(const Node & u, const Node & v);
     std::vector<Node> connectable_node_list();
-    Node select_random_node(std::vector<Node> & node_list);
+    Node select_random_node(const std::vector<Node> & node_list);
     std::tuple<Node, Node> select_connection_node(std::vector<Node> & node_list);
     void add_edge(const Edge & e);
     void remove_edge(const Edge & e);
@@ -61,14 +61,15 @@ GridGraph::GridGraph(int h, int w, int d, int l) : height(h), width(w), degree(d
 void GridGraph::generate_random_graph() {
     std::vector<Node> connectable_node(connectable_node_list());
     while(!connectable_node.empty()) {
+std::cout << connectable_node.size() << " : ";
+for(auto n : connectable_node) std::cout << n.Point::output(); std::cout << std::endl;
+output();
         auto [u, v] = select_connection_node(connectable_node);
+std::cout << u.Point::output() << ", " << v.Point::output() << std::endl;
         if(connectable_node.empty()) break;
         add_edge(Edge(u, v));
-        if(this->at(u).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), v));
-        if(this->at(v).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), u));
-        std::cout << connectable_node.size() << " : ";
-        for(auto n : connectable_node) std::cout << n.Point::output(); std::cout << std::endl;
-        output();
+        if(this->at(u).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), u));
+        if(this->at(v).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), v));
     }
 }
 void GridGraph::generate_random_regular_graph() {}
@@ -83,21 +84,28 @@ const std::vector< Node > & GridGraph::at(const Node & n) const {
 void GridGraph::calculate_aspl() {}
 
 bool GridGraph::is_connectable_node(const Node & n) {
-    if(grid.at(n.h).at(n.w).size() >= diameter) return false;
+    std::cout << n.Point::output() << std::endl;
+    if(grid.at(n.h).at(n.w).size() >= degree) {
+        std::cout << "out of degree range" << std::endl;
+        return false;
+    }
     for(int h = n.h - length; h <= n.h + length; h++) {
         if(h < 0 || height <= h) continue;
-        for(int w = n.w - length; w <= n.w + length; w++) {
+        for(int w = n.w - (length - std::abs(h - n.h)); w <= n.w + (length - std::abs(h - n.h)); w++) {
             if(w < 0 || width <= w) continue;
             if(n == Node(h, w)) continue;
-            if(grid.at(h).at(w).size() < diameter) return true;
+            if(grid.at(h).at(w).size() < degree) {
+                std::cout << "in the degree range" << std::endl;
+                return true;
+            }
         }
     }
+    std::cout << "not match all nodes" << std::endl;
     return false;
 }
 bool GridGraph::exists_edge(const Node & u, const Node & v) {
-    return std::find(this->at(u).begin(), this->at(u).end(), v) != this->at(u).end() ? true : false;
+    return std::find(this->at(u).begin(), this->at(u).end(), v) != this->at(u).end();
 }
-
 std::vector<Node> GridGraph::connectable_node_list() {
     std::vector<Node> connectable_node;
     for(int h = 0; h < height; h++) {
@@ -108,13 +116,15 @@ std::vector<Node> GridGraph::connectable_node_list() {
     }
     return connectable_node;
 }
-Node GridGraph::select_random_node(std::vector<Node> & node_list) {
+Node GridGraph::select_random_node(const std::vector<Node> & node_list) {
     std::uniform_int_distribution<int> list_range(0, node_list.size() - 1);
     return node_list.at(list_range(params::mt));
 }
 std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & node_list) {
     Node u, v;
-    while(manhattan_distance(u, v) > length || u == v || exists_edge(u, v)) {
+    bool is_selected = false;
+    while(manhattan_distance(u, v) > length || u == v || exists_edge(u, v) || !is_selected) {
+        is_selected = false;
         u = select_random_node(node_list);
         if(!is_connectable_node(u)) {
             node_list.erase(std::find(node_list.begin(), node_list.end(), u));
@@ -129,6 +139,7 @@ std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & nod
             if(node_list.empty()) break;
             else continue;
         }
+        is_selected = true;
     }
     return {u, v};
 }
