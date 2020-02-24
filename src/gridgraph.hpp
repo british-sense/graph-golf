@@ -69,8 +69,8 @@ void GridGraph::generate_random_graph() {
         auto [u, v] = select_connection_node(connectable_node);
         if(connectable_node.empty()) break;
         add_edge(Edge(u, v));
-        if(this->at(u).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), u));
-        if(this->at(v).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), v));
+        if(at(u).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), u));
+        if(at(v).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), v));
     }
 }
 void GridGraph::generate_random_regular_graph() {
@@ -86,7 +86,7 @@ const std::vector< Node > & GridGraph::at(const Node & n) const {
 void GridGraph::calculate_aspl() {
 }
 bool GridGraph::is_connectable_node(const Node & u) {
-    if(this->at(u).size() >= degree) return false;
+    if(at(u).size() >= degree) return false;
     for(int h = u.h - length; h <= u.h + length; h++) {
         if(h < 0 || height <= h) continue;
         for(int w = u.w - (length - std::abs(h - u.h)); w <= u.w + (length - std::abs(h - u.h)); w++) {
@@ -94,13 +94,13 @@ bool GridGraph::is_connectable_node(const Node & u) {
             Node v(h, w);
             if(u == v) continue;
             if(exists_edge(u, v)) continue;
-            if(this->at(v).size() < degree) return true;
+            if(at(v).size() < degree) return true;
         }
     }
     return false;
 }
 bool GridGraph::exists_edge(const Node & u, const Node & v) {
-    return std::find(this->at(u).begin(), this->at(u).end(), v) != this->at(u).end();
+    return std::find(at(u).begin(), at(u).end(), v) != at(u).end();
 }
 std::vector<Node> GridGraph::connectable_node_list() {
     std::vector<Node> connectable_node;
@@ -139,13 +139,16 @@ std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & nod
     }
     return {u, v};
 }
+std::tuple<Edge, Edge> GridGraph::select_swap_edge() {
+
+}
 void GridGraph::add_edge(const Edge & e) {
-    this->at(e.u).emplace_back(e.v);
-    this->at(e.v).emplace_back(e.u);
+    at(e.u).emplace_back(e.v);
+    at(e.v).emplace_back(e.u);
 }
 void GridGraph::remove_edge(const Edge & e) {
-    this->at(e.u).erase(std::find(this->at(e.u).begin(), this->at(e.u).end(), e.v));
-    this->at(e.v).erase(std::find(this->at(e.v).begin(), this->at(e.v).end(), e.u));
+    at(e.u).erase(std::find(at(e.u).begin(), at(e.u).end(), e.v));
+    at(e.v).erase(std::find(at(e.v).begin(), at(e.v).end(), e.u));
 }
 void GridGraph::swap_edge(const Edge & e1, const Edge & e2) {
 }
@@ -163,8 +166,8 @@ void GridGraph::output() {
         for(int w = 0; w < width; w++) {
             Node n(h, w);
             std::cout << n.Point::output() + " : ";
-            for(int d = 0; d < this->at(n).size(); d++) {
-                std::cout << this->at(n).at(d).Point::output() << ((d != this->at(n).size() - 1) ? ", " : " ");
+            for(int d = 0; d < at(n).size(); d++) {
+                std::cout << at(n).at(d).Point::output() << ((d != at(n).size() - 1) ? ", " : " ");
             }
             std::cout << std::endl;
         }
@@ -175,7 +178,7 @@ void GridGraph::output_edgefile(const std::string & filename) {
     for(int h = 0; h < height; h++){    
         for(int w = 0; w < width; w++){
             Node u(h, w);
-            for(const auto & v : this->at(u)){
+            for(const auto & v : at(u)){
                 if(u <= v) outputfile << u.Point::output() << " " << v.Point::output() << std::endl;
             }
         }
