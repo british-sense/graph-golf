@@ -1,16 +1,24 @@
 #pragma once
+
+#include <string>
 #include <random>
 
-// general
-static int degree;
+namespace params{
 
-// general graph
-static int node;
+    // general
+    static int degree;
+    static std::string input_edgefile;
+    static std::string output_edgefile;
 
-// grid graph
-static int height;
-static int width;
-static int length;
+    // general graph
+    static int node;
 
-// others
-static std::mt19937 mt;
+    // grid graph
+    static int height;
+    static int width;
+    static int length;
+
+    // others
+    static int seed;
+    static std::mt19937 mt;
+}
