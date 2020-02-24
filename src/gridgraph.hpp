@@ -46,6 +46,7 @@ struct GridGraph {
     void hill_climbing(const int max_evaluation_count);
     void output();
     void output_edgefile(const std::string & filename);
+    void input_edgefile(const std::string & filename);
 
 
     // operator
@@ -140,7 +141,8 @@ std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & nod
     return {u, v};
 }
 std::tuple<Edge, Edge> GridGraph::select_swap_edge() {
-
+    Edge e1, e2;
+    return {e1, e2};
 }
 void GridGraph::add_edge(const Edge & e) {
     at(e.u).emplace_back(e.v);
@@ -182,6 +184,20 @@ void GridGraph::output_edgefile(const std::string & filename) {
                 if(u <= v) outputfile << u.Point::output() << " " << v.Point::output() << std::endl;
             }
         }
+    }
+}
+void GridGraph::input_edgefile(const std::string & filename) {
+    std::ifstream inputfile("../data/" + filename + ".edges");
+    if (inputfile.fail()) {
+        std::cerr << "Failed to open input file." << std::endl;
+        exit(0);
+    }
+
+    std::string str;
+    while(std::getline(inputfile, str)){
+        Node u, v;
+        sscanf(str.data(), "%d,%d %d,%d", &u.h, &u.w, &v.h, &v.w);
+        add_edge(Edge(u, v));
     }
 }
 
