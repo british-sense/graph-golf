@@ -6,6 +6,8 @@
 #include <random>
 #include <algorithm>
 #include <tuple>
+#include <cstring>
+#include <immintrin.h>
 
 #include "params.hpp"
 #include "point.hpp"
@@ -33,6 +35,7 @@ struct GridGraph {
     void generate_symmetory_graph(int g, std::string pattern);
     const std::vector< Node > & at(const Node & n) const;
     std::vector< Node > & at(const Node & n);
+    uint64_t mul(const uint64_t * A, uint64_t * B, unsigned int row_len);
     void calculate_aspl();
     bool is_connectable_node(const Node & n);
     bool exists_edge(const Node & u, const Node & v);
@@ -84,7 +87,66 @@ std::vector< Node > & GridGraph::at(const Node & n) {
 const std::vector< Node > & GridGraph::at(const Node & n) const {
     return grid.at(n.h).at(n.w);
 }
+uint64_t GridGraph::mul(const uint64_t * A, uint64_t * B, unsigned int row_len){
+        
+    uint64_t c = 0;
+    for(int h = 0; h < height; h++){
+        for(int w = 0; w < width; w++){
+            Node n(h, w);
+            __m256i *x = (__m256i *) (B + (h * width + w) * row_len);
+
+            for(auto itr = at(n).begin(); itr != at(n).end(); itr++){
+                int n = itr->h * width + itr->w;
+                __m256i *y = (__m256i *) (A + n * row_len);
+                for(std::size_t j = 0; j < row_len / 4; j++){
+                    __m256i yy = _mm256_load_si256(y + j);
+                    __m256i xx = _mm256_load_si256(x + j);
+                    _mm256_store_si256(x + j, _mm256_or_si256(xx, yy));
+                }
+            }
+            for(unsigned int i = 0; i < row_len; i++){
+                c += _mm_popcnt_u64(((uint64_t *)x)[i]);
+            }
+        }
+    }
+    return c;  
+}
 void GridGraph::calculate_aspl() {
+    // Mori's aspl code.
+    uint64_t m = height * width;
+    unsigned int row_len = (m + 63) / 64;
+
+    row_len = (row_len + 3) / 4 * 4;
+    uint64_t *A = (uint64_t *)_mm_malloc(row_len * m * sizeof(uint64_t), 32);
+    uint64_t *B = (uint64_t *)_mm_malloc(row_len * m * sizeof(uint64_t), 32);
+
+    std::memset(A, 0, row_len * m * sizeof(uint64_t));
+    std::memset(B, 0, row_len * m * sizeof(uint64_t));
+    for(unsigned int i = 0; i < m; i++){
+        A[(i) * row_len + (i) / 64] |= (0x1ULL << ((i) % 64));
+        B[(i) * row_len + (i) / 64] |= (0x1ULL << ((i) % 64));
+    }
+
+    uint64_t ASPL = m * (m - 1);
+    unsigned int k = 0;
+    for(k = 1; k <= m; k++){
+        uint64_t num = mul(A, B, row_len);
+
+        std::swap(A, B);
+
+        if(num == m * m) break;
+        ASPL += m * m - num;
+    }
+
+    if(k <= m){
+        diameter = k;
+        aspl = static_cast<double>(ASPL) / (m * (m - 1));
+    }else{
+        diameter = std::numeric_limits<int>::max();
+        aspl = std::numeric_limits<double>::max();
+    }
+    _mm_free(A);
+    _mm_free(B);
 }
 bool GridGraph::is_connectable_node(const Node & u) {
     if(at(u).size() >= degree) return false;
