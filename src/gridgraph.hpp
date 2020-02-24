@@ -39,10 +39,13 @@ struct GridGraph {
     void calculate_aspl();
     bool is_connectable_node(const Node & n);
     bool exists_edge(const Node & u, const Node & v);
-    std::vector<Node> connectable_node_list();
+    std::vector<Node> get_connectable_node_list();
+    Node get_random_node();
     Node select_random_node(const std::vector<Node> & node_list);
-    std::tuple<Node, Node> select_connection_node(std::vector<Node> & node_list);
-    std::tuple<Edge, Edge> select_swap_edge();
+    std::tuple<Node, Node> select_random_connection_nodes(std::vector<Node> & node_list);
+    Edge get_random_edge();
+    std::vector<Edge> get_swappable_edge_list(const Edge & e);
+    std::tuple<Edge, Edge> get_random_swapping_edges();
     void add_edge(const Edge & e);
     void remove_edge(const Edge & e);
     void swap_edge(const Edge & e1, const Edge & e2);
@@ -68,9 +71,9 @@ GridGraph::GridGraph(int h, int w, int d, int l) : height(h), width(w), degree(d
 
 // member function
 void GridGraph::generate_random_graph() {
-    std::vector<Node> connectable_node(connectable_node_list());
+    std::vector<Node> connectable_node(get_connectable_node_list());
     while(!connectable_node.empty()) {
-        auto [u, v] = select_connection_node(connectable_node);
+        auto [u, v] = select_random_connection_nodes(connectable_node);
         if(connectable_node.empty()) break;
         add_edge(Edge(u, v));
         if(at(u).size() == degree) connectable_node.erase(std::find(connectable_node.begin(), connectable_node.end(), u));
@@ -90,21 +93,21 @@ const std::vector< Node > & GridGraph::at(const Node & n) const {
 uint64_t GridGraph::mul(const uint64_t * A, uint64_t * B, unsigned int row_len){
         
     uint64_t c = 0;
-    for(int h = 0; h < height; h++){
-        for(int w = 0; w < width; w++){
+    for(int h = 0; h < height; h++) {
+        for(int w = 0; w < width; w++) {
             Node n(h, w);
-            __m256i *x = (__m256i *) (B + (h * width + w) * row_len);
+            __m256i * x = (__m256i *) (B + (h * width + w) * row_len);
 
-            for(auto itr = at(n).begin(); itr != at(n).end(); itr++){
+            for(auto itr = at(n).begin(); itr != at(n).end(); itr++) {
                 int n = itr->h * width + itr->w;
-                __m256i *y = (__m256i *) (A + n * row_len);
-                for(std::size_t j = 0; j < row_len / 4; j++){
+                __m256i * y = (__m256i *) (A + n * row_len);
+                for(std::size_t j = 0; j < row_len / 4; j++) {
                     __m256i yy = _mm256_load_si256(y + j);
                     __m256i xx = _mm256_load_si256(x + j);
                     _mm256_store_si256(x + j, _mm256_or_si256(xx, yy));
                 }
             }
-            for(unsigned int i = 0; i < row_len; i++){
+            for(unsigned int i = 0; i < row_len; i++) {
                 c += _mm_popcnt_u64(((uint64_t *)x)[i]);
             }
         }
@@ -117,31 +120,31 @@ void GridGraph::calculate_aspl() {
     unsigned int row_len = (m + 63) / 64;
 
     row_len = (row_len + 3) / 4 * 4;
-    uint64_t *A = (uint64_t *)_mm_malloc(row_len * m * sizeof(uint64_t), 32);
-    uint64_t *B = (uint64_t *)_mm_malloc(row_len * m * sizeof(uint64_t), 32);
+    uint64_t * A = (uint64_t *)_mm_malloc(row_len * m * sizeof(uint64_t), 32);
+    uint64_t * B = (uint64_t *)_mm_malloc(row_len * m * sizeof(uint64_t), 32);
 
     std::memset(A, 0, row_len * m * sizeof(uint64_t));
     std::memset(B, 0, row_len * m * sizeof(uint64_t));
-    for(unsigned int i = 0; i < m; i++){
+    for(unsigned int i = 0; i < m; i++) {
         A[(i) * row_len + (i) / 64] |= (0x1ULL << ((i) % 64));
         B[(i) * row_len + (i) / 64] |= (0x1ULL << ((i) % 64));
     }
 
-    uint64_t ASPL = m * (m - 1);
+    uint64_t aspl = m * (m - 1);
     unsigned int k = 0;
-    for(k = 1; k <= m; k++){
+    for(k = 1; k <= m; k++) {
         uint64_t num = mul(A, B, row_len);
 
         std::swap(A, B);
 
         if(num == m * m) break;
-        ASPL += m * m - num;
+        aspl += m * m - num;
     }
 
-    if(k <= m){
+    if(k <= m) {
         diameter = k;
-        aspl = static_cast<double>(ASPL) / (m * (m - 1));
-    }else{
+        aspl = static_cast<double>(aspl) / (m * (m - 1));
+    } else {
         diameter = std::numeric_limits<int>::max();
         aspl = std::numeric_limits<double>::max();
     }
@@ -165,7 +168,7 @@ bool GridGraph::is_connectable_node(const Node & u) {
 bool GridGraph::exists_edge(const Node & u, const Node & v) {
     return std::find(at(u).begin(), at(u).end(), v) != at(u).end();
 }
-std::vector<Node> GridGraph::connectable_node_list() {
+std::vector<Node> GridGraph::get_connectable_node_list() {
     std::vector<Node> connectable_node;
     for(int h = 0; h < height; h++) {
         for (int w = 0; w < width; w++) {
@@ -179,7 +182,12 @@ Node GridGraph::select_random_node(const std::vector<Node> & node_list) {
     std::uniform_int_distribution<int> list_range(0, node_list.size() - 1);
     return node_list.at(list_range(params::mt));
 }
-std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & node_list) {
+Node GridGraph::get_random_node() {
+    std::uniform_int_distribution<int> h_range(0, height - 1);
+    std::uniform_int_distribution<int> w_range(0, width - 1);
+     return Node(h_range(params::mt), w_range(params::mt));
+}
+std::tuple<Node, Node> GridGraph::select_random_connection_nodes(std::vector<Node> & node_list) {
     Node u, v;
     bool is_selected = false;
     while(manhattan_distance(u, v) > length || u == v || exists_edge(u, v) || !is_selected) {
@@ -202,8 +210,32 @@ std::tuple<Node, Node> GridGraph::select_connection_node(std::vector<Node> & nod
     }
     return {u, v};
 }
-std::tuple<Edge, Edge> GridGraph::select_swap_edge() {
-    Edge e1, e2;
+Edge GridGraph::get_random_edge() {
+    Node u(get_random_node());
+    std::uniform_int_distribution<int> d_range(0, at(u).size() - 1);
+    Node v(at(u).at(d_range(params::mt)));
+    return Edge(u, v);
+}
+std::vector<Edge> GridGraph::get_swappable_edge_list(const Edge & e1) {
+    std::vector<Edge> edge_list;
+    for(int h = e1.u.h - length; h <= e1.u.h + length; h++) {
+        if(h < 0 || height <= h) continue;
+        for(int w = e1.u.w - (length - std::abs(h - e1.u.h)); w <= e1.u.w + (length - std::abs(h - e1.u.h)); w++) {
+            if(w < 0 || width <= w) continue;
+            Node v(h, w);
+            if(e1.u == v) continue;
+            for(auto itr = at(v).begin(); itr != at(v).end(); itr++) {
+                if(manhattan_distance(e1.v, *itr) <= length) edge_list.emplace_back(Edge(v, *itr));
+            }
+        }
+    }
+    return edge_list;
+}
+std::tuple<Edge, Edge> GridGraph::get_random_swapping_edges() {
+    // select random edge
+    Edge e1(get_random_edge()), e2(get_random_edge());
+    // check whether exist swappable edge
+    // if existing edge then return e2
     return {e1, e2};
 }
 void GridGraph::add_edge(const Edge & e) {
@@ -220,7 +252,7 @@ void GridGraph::swap_edge(const Edge & e1, const Edge & e2) {
 void GridGraph::hill_climbing(const int max_evaluation_count) {
     for(int evaluation_count = 0; evaluation_count < max_evaluation_count; evaluation_count++) {
         GridGraph G = *this;
-        auto [e1, e2] = G.select_swap_edge();
+        auto [e1, e2] = G.get_random_swapping_edges();
         G.swap_edge(e1, e2);
         G.calculate_aspl();
         if(*this > G) *this = G;
