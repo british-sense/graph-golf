@@ -44,6 +44,7 @@ struct GridGraph {
     Node select_random_node(const std::vector<Node> & node_list);
     std::tuple<Node, Node> select_random_connection_nodes(std::vector<Node> & node_list);
     Edge get_random_edge();
+    Edge select_random_edge(const std::vector<Edge> & edge_list);
     std::vector<Edge> get_swappable_edge_list(const Edge & e);
     std::tuple<Edge, Edge> get_random_swapping_edges();
     void add_edge(const Edge & e);
@@ -216,6 +217,10 @@ Edge GridGraph::get_random_edge() {
     Node v(at(u).at(d_range(params::mt)));
     return Edge(u, v);
 }
+Edge GridGraph::select_random_edge(const std::vector<Edge> & edge_list) {
+    std::uniform_int_distribution<int> e_range(0, edge_list.size() - 1);
+    return edge_list.at(e_range(params::mt));
+}
 std::vector<Edge> GridGraph::get_swappable_edge_list(const Edge & e1) {
     std::vector<Edge> edge_list;
     for(int h = e1.u.h - length; h <= e1.u.h + length; h++) {
@@ -232,10 +237,9 @@ std::vector<Edge> GridGraph::get_swappable_edge_list(const Edge & e1) {
     return edge_list;
 }
 std::tuple<Edge, Edge> GridGraph::get_random_swapping_edges() {
-    // select random edge
-    Edge e1(get_random_edge()), e2(get_random_edge());
-    // check whether exist swappable edge
-    // if existing edge then return e2
+    Edge e1(get_random_edge());
+    std::vector<Edge> swappable_edges(get_swappable_edge_list(e1));
+    Edge e2(select_random_edge(swappable_edges));
     return {e1, e2};
 }
 void GridGraph::add_edge(const Edge & e) {
