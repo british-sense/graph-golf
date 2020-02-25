@@ -252,6 +252,10 @@ void GridGraph::remove_edge(const Edge & e) {
     at(e.v).erase(std::find(at(e.v).begin(), at(e.v).end(), e.u));
 }
 void GridGraph::swap_edge(const Edge & e1, const Edge & e2) {
+    remove_edge(e1);
+    remove_edge(e2);
+    add_edge(Edge(e1.u, e2.u));
+    add_edge(Edge(e1.v, e2.v));
 }
 void GridGraph::hill_climbing(const int max_evaluation_count) {
     for(int evaluation_count = 0; evaluation_count < max_evaluation_count; evaluation_count++) {
