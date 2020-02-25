@@ -131,7 +131,7 @@ void GridGraph::calculate_aspl() {
         B[(i) * row_len + (i) / 64] |= (0x1ULL << ((i) % 64));
     }
 
-    uint64_t aspl = m * (m - 1);
+    uint64_t apsp = m * (m - 1);
     unsigned int k = 0;
     for(k = 1; k <= m; k++) {
         uint64_t num = mul(A, B, row_len);
@@ -139,12 +139,12 @@ void GridGraph::calculate_aspl() {
         std::swap(A, B);
 
         if(num == m * m) break;
-        aspl += m * m - num;
+        apsp += m * m - num;
     }
 
     if(k <= m) {
         diameter = k;
-        aspl = static_cast<double>(aspl) / (m * (m - 1));
+        aspl = static_cast<double>(apsp) / (m * (m - 1));
     } else {
         diameter = std::numeric_limits<int>::max();
         aspl = std::numeric_limits<double>::max();
