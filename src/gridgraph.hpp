@@ -257,7 +257,7 @@ void GridGraph::swap_edge(const Edge & e1, const Edge & e2) {
     add_edge(Edge(e1.u, e2.u));
     add_edge(Edge(e1.v, e2.v));
 }
-void GridGraph::hill_climbing(const int max_evaluation_count) {
+void GridGraph::hill_climbing(const int max_evaluation_count = 1e3) {
     for(int evaluation_count = 0; evaluation_count < max_evaluation_count; evaluation_count++) {
         GridGraph G = *this;
         auto [e1, e2] = G.get_random_swapping_edges();
