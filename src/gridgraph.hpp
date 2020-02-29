@@ -49,7 +49,7 @@ struct GridGraph {
     std::tuple<Edge, Edge> get_random_swapping_edges();
     void add_edge(const Edge & e);
     void remove_edge(const Edge & e);
-    void swap_edge(const Edge & e1, const Edge & e2);
+    void swap_edge(Edge & e1, Edge & e2);
     void hill_climbing(const int max_evaluation_count);
     void output();
     void output_edgefile(const std::string & filename);
@@ -251,19 +251,20 @@ void GridGraph::remove_edge(const Edge & e) {
     at(e.u).erase(std::find(at(e.u).begin(), at(e.u).end(), e.v));
     at(e.v).erase(std::find(at(e.v).begin(), at(e.v).end(), e.u));
 }
-void GridGraph::swap_edge(const Edge & e1, const Edge & e2) {
+void GridGraph::swap_edge(Edge & e1, Edge & e2) {
     remove_edge(e1);
     remove_edge(e2);
-    add_edge(Edge(e1.u, e2.u));
-    add_edge(Edge(e1.v, e2.v));
+    std::swap(e1.v, e2.u);
+    add_edge(e1);
+    add_edge(e2);
 }
 void GridGraph::hill_climbing(const int max_evaluation_count = 1e3) {
     for(int evaluation_count = 0; evaluation_count < max_evaluation_count; evaluation_count++) {
-        GridGraph G = *this;
-        auto [e1, e2] = G.get_random_swapping_edges();
-        G.swap_edge(e1, e2);
-        G.calculate_aspl();
-        if(*this > G) *this = G;
+        double before_aspl = aspl;
+        auto [e1, e2] = get_random_swapping_edges(); // <- this function has bug.
+        swap_edge(e1, e2);
+        calculate_aspl();
+        if(aspl > before_aspl) swap_edge(e1, e2);
     }
 }
 void GridGraph::output() {
