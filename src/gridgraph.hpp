@@ -248,6 +248,7 @@ void GridGraph::add_edge(const Edge & e) {
     at(e.v).emplace_back(e.u);
 }
 void GridGraph::remove_edge(const Edge & e) {
+    if(std::find(at(e.u).begin(), at(e.u).end(), e.v) != at(e.u).end()) return;
     at(e.u).erase(std::find(at(e.u).begin(), at(e.u).end(), e.v));
     at(e.v).erase(std::find(at(e.v).begin(), at(e.v).end(), e.u));
 }
